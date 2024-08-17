@@ -8,7 +8,7 @@
 #include <memory>
 #include <sstream>
 
-#include "skipList.hpp"
+#include "skiplist.hpp"
 #include "lc.h"
 #include "utils.hpp"
 
