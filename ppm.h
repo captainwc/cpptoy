@@ -1,4 +1,5 @@
 #include "lc.h"
+
 /// MARK: ppm img
 
 struct color {
@@ -13,6 +14,7 @@ const color WHITE{255, 255, 255};
 const color RED{255, 0, 0};
 const color GREEN{0, 255, 0};
 const color BLUE{0, 0, 255};
+
 inline color map_int_to_color(int x) {
     if (x < 20) {
         return WHITE;
@@ -29,12 +31,12 @@ inline color map_int_to_color(int x) {
     return BLACK;
 }
 }  // namespace Colors
+
 using namespace Colors;
 
 class Image {
-   public:
-    explicit Image(string &&filename = "lc_ppm_demo", int width = 100,
-                   int height = 100, string &&folder = "pic")
+public:
+    explicit Image(string &&filename = "lc_ppm_demo", int width = 100, int height = 100, string &&folder = "pic")
         : img_(height, vector<color>(width, GREEN)),
           picname_(std::move(filename)),
           width_(width),
@@ -45,18 +47,17 @@ class Image {
             picname_ = picname_.substr(0, r);
         }
     }
-    explicit Image(vector<vector<color>> &&data,
-                   string &&filename = "lc_ppm_demo", string &&folder = "pic")
+
+    explicit Image(vector<vector<color>> &&data, string &&filename = "lc_ppm_demo", string &&folder = "pic")
         : img_(std::move(data)),
           picname_(std::move(filename)),
           width_(img_[0].size()),
           height_(img_.size()),
-          save_loc_(get_path(folder)) {}
+          save_loc_(get_path(folder)) {
+    }
 
-    explicit Image(
-        const vector<vector<int>> &data, string filename = "lc_ppm_demo",
-        const std::function<color(int)> &mapper = Colors::map_int_to_color,
-        string &&folder = "pic")
+    explicit Image(const vector<vector<int>> &data, string filename = "lc_ppm_demo",
+                   const std::function<color(int)> &mapper = Colors::map_int_to_color, string &&folder = "pic")
         : img_(data.size(), vector<color>(data[0].size(), Colors::BLACK)),
           picname_(std::move(filename)),
           width_(data[0].size()),
@@ -68,10 +69,10 @@ class Image {
             }
         }
     }
-    explicit Image(
-        const vector<int> &data, string filename = "lc_ppm_demo",
-        const std::function<color(int)> &mapper = Colors::map_int_to_color,
-        int height = 100, string &&folder = "pic")
+
+    explicit Image(const vector<int> &data, string filename = "lc_ppm_demo",
+                   const std::function<color(int)> &mapper = Colors::map_int_to_color, int height = 100,
+                   string &&folder = "pic")
         : img_(height, vector<color>(data.size(), Colors::BLACK)),
           picname_(std::move(filename)),
           width_(data.size()),
@@ -90,16 +91,16 @@ class Image {
     }
 
     Image(const Image &another)
-        : img_(another.img_),
-          picname_(another.picname_),
-          width_(another.width_),
-          height_(another.height_) {}
+        : img_(another.img_), picname_(another.picname_), width_(another.width_), height_(another.height_) {
+    }
 
     Image(Image &&another) = delete;
     Image &operator=(const Image &another) = delete;
     Image &operator=(Image &&another) = delete;
 
-    vector<color> &operator[](int row) { return img_[row]; }
+    vector<color> &operator[](int row) {
+        return img_[row];
+    }
 
     void draw(string_view filetype = "jpg") {
         if (!write_to_file()) {
@@ -113,12 +114,11 @@ class Image {
         string target_file(picname_);
         target_file.append(".").append(filetype.data());
         if (!save(target_file)) {
-            fprintf(stderr, "[FAILED] cannot move %s to dest\n",
-                    target_file.c_str());
+            fprintf(stderr, "[FAILED] cannot move %s to dest\n", target_file.c_str());
         }
     }
 
-   private:
+private:
     vector<vector<color>> img_;
     string picname_;
     int width_;
@@ -205,11 +205,7 @@ class Image {
             }
         }
         string mv_cmd("mv ");
-        mv_cmd.append(file.data())
-            .append(" ")
-            .append(save_loc_)
-            .append("/")
-            .append(file.data());
+        mv_cmd.append(file.data()).append(" ").append(save_loc_).append("/").append(file.data());
         auto *mv_ret = popen(mv_cmd.c_str(), "r");
         if (mv_ret != nullptr) {
             pclose(mv_ret);

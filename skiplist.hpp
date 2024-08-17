@@ -14,28 +14,32 @@ struct SkipListNode {
     std::vector<SkipListNode*> nextNodes;
 
     SkipListNode(int level, K k = K{}, V v = V{})
-        : key(k),
-          val(v),
-          level(level),
-          nextNodes(vector<SkipListNode*>(level, nullptr)) {}
+        : key(k), val(v), level(level), nextNodes(vector<SkipListNode*>(level, nullptr)) {
+    }
 };
 
 template <typename K, typename V>
 class SkipList {
-   public:
-    SkipList() : node_num(0), head(new SkipListNode<K, V>(max_level)) {}
+public:
+    SkipList() : node_num(0), head(new SkipListNode<K, V>(max_level)) {
+    }
 
     SkipListNode<K, V>* find(K key) const;
     V& operator[](K key);
     bool insert(K key, V val);
     bool erase(K key);
 
-    int size() const { return node_num; }
-    bool empty() const { return node_num == 0; }
+    int size() const {
+        return node_num;
+    }
+
+    bool empty() const {
+        return node_num == 0;
+    }
 
     void dump() const;
 
-   private:
+private:
     static int get_random_level();
 
     static int max_level;

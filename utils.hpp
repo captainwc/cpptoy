@@ -90,7 +90,8 @@ template <typename ElemType, typename Comp = std::less<ElemType>>
     requires sort_helper::Comparator<Comp, ElemType>
 void quickSort(std::span<ElemType> sp, Comp cmp = Comp()) {
     int len = sp.size();
-    if (len <= 1) return;
+    if (len <= 1)
+        return;
 
     int pivot_idx = len / 2;
     auto partition_pos = sort_helper::partition(sp, pivot_idx, cmp);
@@ -116,8 +117,7 @@ void mergeSort(span<ElemType> sp, Comp cmp = Comp()) {
 
 namespace algorithm {
 template <typename MutableIterator, typename Predicit>
-MutableIterator partition(MutableIterator start, MutableIterator end,
-                          Predicit pred) {
+MutableIterator partition(MutableIterator start, MutableIterator end, Predicit pred) {
     if (start == end) {
         return start;
     }
@@ -144,10 +144,12 @@ void quickSort(MutableIterator begin, MutableIterator end) {
         return;
     }
     auto pivot = *begin;
-    auto pos = algorithm::partition(
-        begin, end, [pivot](const auto& elem) { return elem < pivot; });
-    auto pivot_pos = algorithm::partition(
-        pos, end, [pivot](const auto& elem) { return elem <= pivot; });
+    auto pos = algorithm::partition(begin, end, [pivot](const auto& elem) {
+        return elem < pivot;
+    });
+    auto pivot_pos = algorithm::partition(pos, end, [pivot](const auto& elem) {
+        return elem <= pivot;
+    });
     algorithm::quickSort(begin, pivot_pos);
     algorithm::quickSort(pivot_pos + 1, end);
 }
