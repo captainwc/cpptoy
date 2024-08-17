@@ -1,8 +1,6 @@
 #ifndef SHUAIKAI_UTILS_HPP
 #define SHUAIKAI_UTILS_HPP
 
-#include <asm-generic/errno.h>
-
 #include <algorithm>
 #include <cassert>
 #include <climits>

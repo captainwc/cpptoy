@@ -8,7 +8,7 @@
 #include <memory>
 #include <sstream>
 
-#include "SkipList.hpp"
+#include "skipList.hpp"
 #include "lc.h"
 #include "utils.hpp"
 
@@ -189,7 +189,7 @@ void graph_test() {
 int main() {
     LOGV("START {} test", "lc");
 
-    // RUN(lc_test);
+	RUN(lc_test);
     RUN(utils_test);
     RUN(list_test);
     RUN(tree_test);
@@ -197,7 +197,7 @@ int main() {
     RUN(string_utils_test);
     RUN(parse_op_test);
     RUN(skiplist_test);
-    // RUN(skiplist_benchmark);
+	RUN(skiplist_benchmark);
     RUN(graph_test);
 
     ASSERT_ALL_PASSED();
