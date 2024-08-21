@@ -1,13 +1,21 @@
 #ifndef SHUAIKAI_LC_H
 #define SHUAIKAI_LC_H
 
-static_assert(__cplusplus >= 201703L, "C++17 is required, which is same as leetcode oj environment");
+static_assert(__cplusplus >= 202002L, "Keep up with the times and embrace C++20, young people!");
 
 #ifdef __linux__
 #include <fcntl.h>
 #include <sys/signal.h>
 #include <sys/types.h>
 #include <unistd.h>
+#endif
+
+// This section should check for the Boost environment, but BOOST_VERSION seems to be problematic.
+// Since Boost is present on my Linux system but not on Windows, I'll use __linux__ for the check.
+// #ifdef BOOST_VERSION
+#ifdef __linux__
+#define HAS_BOOST_ENV
+#include <boost/type_index.hpp>
 #endif
 
 #include <algorithm>
@@ -288,16 +296,19 @@ template <typename T>
 concept StreamOutable = requires(std::ostream &os, T elem) {
     { os << elem } -> std::same_as<std::ostream &>;
 };
+
 template <typename T>
 concept Serializable = requires(T obj) {
     { obj.toString() } -> std::convertible_to<std::string_view>;
 };
+
 template <typename T>
 concept SequentialContainer = requires(T c) {
     typename T::value_type;
     { c.cbegin() } -> std::same_as<typename T::const_iterator>;
     { c.cend() } -> std::same_as<typename T::const_iterator>;
 };
+
 template <typename T>
 concept MappedContainer = requires(T m) {
     typename T::key_type;
@@ -305,6 +316,7 @@ concept MappedContainer = requires(T m) {
     { m.cbegin() } -> std::same_as<typename T::const_iterator>;
     { m.cend() } -> std::same_as<typename T::const_iterator>;
 };
+
 template <typename T>
 concept StackLike = requires(T m) {
     typename T::value_type;
@@ -312,6 +324,7 @@ concept StackLike = requires(T m) {
     { m.top() } -> std::convertible_to<typename T::const_reference>;
     { m.empty() } -> std::same_as<bool>;
 };
+
 template <typename T>
 concept QueueLike = requires(T m) {
     typename T::value_type;
@@ -319,14 +332,16 @@ concept QueueLike = requires(T m) {
     { m.front() } -> std::convertible_to<typename T::const_reference>;
     { m.empty() } -> std::same_as<bool>;
 };
+
 template <typename T>
 concept PairLike = requires(T p) {
     { std::get<0>(p) } -> std::convertible_to<typename T::first_type>;
     { std::get<1>(p) } -> std::convertible_to<typename T::second_type>;
 };
+
 template <typename T>
-concept Printable = StreamOutable<T> || Serializable<T> || SequentialContainer<T> || MappedContainer<T> || PairLike<T>
-                    || StackLike<T> || QueueLike<T>;
+concept Printable = StreamOutable<T> || Serializable<T> || SequentialContainer<T> || MappedContainer<T> || PairLike<
+    T> || StackLike<T> || QueueLike<T>;
 
 template <bool>
 auto toString(bool obj);
@@ -335,27 +350,27 @@ template <Printable T>
 auto toString(const T &obj);
 
 template <typename T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 auto forBasedContainer2String(const T &c);
 
 template <SequentialContainer T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 auto SequentialContainer2String(const T &c);
 
 template <PairLike T>
-    requires Printable<typename T::first_type> && Printable<typename T::second_type>
+requires Printable<typename T::first_type> && Printable<typename T::second_type>
 auto Pair2String(const T &p);
 
 template <MappedContainer T>
-    requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
+requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
 auto MappedContainer2String(const T &c);
 
 template <StackLike T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 auto Stack2String(const T &c);
 
 template <QueueLike T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 auto Queue2String(const T &c);
 
 /// MARK: LEETCODE
@@ -498,7 +513,8 @@ inline void reverseList(ListNode **head) {
 /// MARK: printer Impl
 
 template <PairLike T>
-    requires Printable<typename T::first_type> && Printable<typename T::second_type>
+requires Printable<typename T::first_type> && Printable<typename T::second_type>
+
 auto Pair2String(const T &p) {
     std::stringstream ss;
     ss << '{' << toString(std::get<0>(p)) << ELEM_SEP << toString(std::get<1>(p)) << '}';
@@ -506,7 +522,8 @@ auto Pair2String(const T &p) {
 }
 
 template <typename T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
+
 auto forBasedContainer2String(const T &c) {
     if (c.empty()) {
         return "[]"s;
@@ -530,19 +547,22 @@ auto forBasedContainer2String(const T &c) {
 }
 
 template <SequentialContainer T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
+
 auto SequentialContainer2String(const T &c) {
     return forBasedContainer2String(c);
 }
 
 template <MappedContainer T>
-    requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
+requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
+
 auto MappedContainer2String(const T &c) {
     return forBasedContainer2String(c);
 }
 
 template <StackLike T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
+
 auto Stack2String(const T &c) {
     if (c.empty()) {
         return "[]"s;
@@ -565,7 +585,8 @@ auto Stack2String(const T &c) {
 }
 
 template <QueueLike T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
+
 auto Queue2String(const T &c) {
     if (c.empty()) {
         return "[]"s;
@@ -920,6 +941,19 @@ inline string getRandomString(int len = 10, bool uniqueElem = false, int charset
     return ss.str();
 }
 
+/// MARK: boost utils
+
+#ifdef HAS_BOOST_ENV
+template <typename T>
+string getTypeName(bool isRawName = false) {
+    if (isRawName) {
+        return boost::typeindex::type_id_with_cvr<T>().raw_name();
+    }
+    return boost::typeindex::type_id_with_cvr<T>().pretty_name();
+}
+#endif
+
+/// MARK: Graph
 namespace graphConst {
 const int dummyValue = 0;
 const int wuxiangtuWeight = 1;
@@ -1088,19 +1122,138 @@ string Graph<int>::toString() const {
     return ret;
 }
 
-class UF {
+/// MARK UnionFindSet
+template <Printable T, typename Less = std::less<T>>
+class UnionFindSet {
+private:
+    int cnt;
+    map<T, T, Less> parent;
+    Less lesser;
+
+    bool equal(const T &a, const T &b) const {
+        return !lesser(a, b) && !lesser(b, a);
+    }
+
+public:
+    UnionFindSet() : cnt(0), lesser(Less()) {
+    }
+
+    explicit UnionFindSet(Graph<T> g) : cnt(g.size()) {
+        for (auto val : g.nodes) {
+            parent.emplace(val, val);
+        }
+        for (int i = 0; i < g.size(); i++) {
+            if (g.isYouXiang) {
+                for (int j = 0; j < g.size(); j++) {
+                    if (g.edges[i][j] != graphConst::dummyValue) {
+                        connect(g.nodes[i], g.nodes[j]);
+                    }
+                }
+            } else {
+                for (int j = 0; j < i; j++) {
+                    if (g.edges[i][j] != graphConst::dummyValue) {
+                        connect(g.nodes[i], g.nodes[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    int count() const {
+        return cnt;
+    }
+
+    void add(T val) {
+        auto [it, yes] = parent.emplace(val, val);
+        if (yes) {
+            ++cnt;
+        }
+    }
+
+    void add(T key, T val) {
+        auto [it1, yes1] = parent.emplace(key, key);
+        if (yes1) {
+            ++cnt;
+        }
+        auto [it2, yes2] = parent.emplace(val, val);
+        if (yes2) {
+            ++cnt;
+        }
+        connect(key, val);
+    }
+
+    T find(T key) {
+        if (parent.find(key) == parent.end()) {
+            throw std::out_of_range(formatStr("key {} Unexist.", key));
+        }
+        T p = parent[key];
+        if (equal(p, key)) {  // equal要求const参数，传递parent[key]会导致map类型变为const map，进而无法引用
+            return key;
+        }
+        return find(p);
+    }
+
+    void connect(T key1, T key2) {
+        T r1 = find(key1);
+        T r2 = find(key2);
+        if (!equal(r1, r2)) {
+            parent[r1] = r2;
+            --cnt;
+        }
+    }
+
+    string toString() const {
+        if (cnt == 0) {
+            return "[]"s;
+        }
+        vector<T> top;
+        for (auto [k, v] : parent) {
+            if (equal(k, v)) {
+                top.emplace_back(k);
+            }
+        }
+        stringstream ss;
+        for (auto n : top) {
+            ss << toStringHelper(n) << "\n";
+        }
+        string ret = ss.str();
+        return ret;
+    }
+
+    string toStringHelper(T a) const {
+        stringstream ss;
+        ss << formatStr("{}", a) << "-(";
+        for (auto [k, v] : parent) {
+            if (equal(v, a) && !equal(k, a)) {
+                ss << toStringHelper(k) << ",";
+            }
+        }
+        string ret = ss.str();
+        if (ret.back() == ',') {
+            ret.pop_back();
+            ret += ")";
+        } else {
+            ret.pop_back();
+            ret.pop_back();
+        }
+        return ret;
+    }
+};
+
+template <>
+class UnionFindSet<int> {
 private:
     int cnt;
     vector<int> parent;
 
 public:
-    UF(int n) : cnt(n), parent(n) {
+    UnionFindSet(int n) : cnt(n), parent(n) {
         for (int i = 0; i < n; i++) {
             parent[i] = i;
         }
     }
 
-    UF(Graph<int> g) : cnt(g.size()), parent(cnt) {
+    UnionFindSet(Graph<int> g) : cnt(g.size()), parent(cnt) {
         for (int i = 0; i < cnt; i++) {
             parent[i] = i;
         }
@@ -1135,7 +1288,7 @@ public:
         return parent[a];
     }
 
-    UF &connect(int a, int b) {
+    UnionFindSet &connect(int a, int b) {
         int ra = find(a);
         int rb = find(b);
         if (ra != rb) {
@@ -1191,4 +1344,5 @@ public:
         return ret;
     }
 };
+
 #endif  // SHUAIKAI_LC_H
