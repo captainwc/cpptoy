@@ -28,6 +28,7 @@ static_assert(__cplusplus >= 202002L, "Keep up with the times and embrace C++20,
 #include <cstdlib>
 #include <cstring>
 #include <deque>
+#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -35,6 +36,7 @@ static_assert(__cplusplus >= 202002L, "Keep up with the times and embrace C++20,
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <list>
 #include <map>
 #include <memory>
 #include <queue>
