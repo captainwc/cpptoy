@@ -10,11 +10,12 @@ static_assert(__cplusplus >= 202002L, "Keep up with the times and embrace C++20,
 #include <unistd.h>
 #endif
 
-// This section should check for the Boost environment, but BOOST_VERSION seems to be problematic.
 // Since Boost is present on my Linux system but not on Windows, I'll use __linux__ for the check.
-// #ifdef BOOST_VERSION
 #ifdef __linux__
-#define HAS_BOOST_ENV
+#include <boost/version.hpp>
+#endif
+
+#if BOOST_VERSION >= 107400
 #include <boost/type_index.hpp>
 #endif
 
