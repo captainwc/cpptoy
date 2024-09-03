@@ -28,7 +28,6 @@ static_assert(__cplusplus >= 202002L, "Keep up with the times and embrace C++20,
 #include <cstdlib>
 #include <cstring>
 #include <deque>
-#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -480,7 +479,12 @@ inline TreeNode *buildTree(span<int> preorder, span<int> inorder) {
     return root;
 }
 
-inline ListNode *buildList(vector<int> &&data) {
+inline TreeNode *buildRandomTree(int len = 10) {
+    FILL_ME();
+    return nullptr;
+}
+
+inline ListNode *vector2List(vector<int> &&data) {
     int len = data.size();
     auto *head = new ListNode(data[0]);
     auto *tail = head;
@@ -492,7 +496,7 @@ inline ListNode *buildList(vector<int> &&data) {
 }
 
 inline ListNode *buildList(vector<int> &data) {
-    return buildList(std::move(data));
+    return vector2List(std::move(data));
 }
 
 inline void reverseList(ListNode **head) {
@@ -871,7 +875,7 @@ inline vector<int> getIntVector(string str) {
     return ret;
 }
 
-inline vector<int> getRandomIntVector(int len = 10, int start = 0, int end = 100, bool uniqueElem = true) {
+inline vector<int> getRandomIntVector(int len = 10, int start = 0, int end = 100, bool uniqueElem = false) {
     vector<int> vc;
     unordered_set<int> elemset;
     vc.reserve(len);
@@ -1346,5 +1350,118 @@ public:
         return ret;
     }
 };
+
+/// MARK: DataStructure
+
+template <typename ValueType, typename Compare = std::greater<>>
+class Heap {
+private:
+    Compare comp;
+    std::vector<ValueType> data;
+    int elemNums;
+
+private:
+    void buildHeap();
+    void adjustUp(int k);
+    void adjustDown(int k);
+
+public:
+    Heap() : comp(Compare()), data(1, ValueType{}), elemNums(0) {
+    }
+
+    Heap(std::vector<ValueType> vals) : comp(Compare()), data(std::move(vals)), elemNums(data.size()) {
+        data.insert(data.begin(), ValueType{});
+        buildHeap();
+    }
+
+    explicit Heap(const Compare &cmp) : comp(cmp), data(1, ValueType{}), elemNums(0) {
+    }
+
+    ValueType &top();
+
+    void pop() noexcept;
+    void push(ValueType val);
+
+    bool empty() const {
+        return elemNums == 0;
+    }
+
+    int size() const {
+        return elemNums;
+    }
+
+    std::string toString() const {
+        return ::toString(std::vector<ValueType>(data.begin() + 1, data.begin() + elemNums));
+    }
+
+public:
+    static void sort(vector<ValueType> &vc);
+};
+
+template <typename ValueType, typename Compare>
+void Heap<ValueType, Compare>::buildHeap() {
+    for (int i = elemNums / 2; i >= 1; --i) {
+        adjustDown(i);
+    }
+}
+
+template <typename ValueType, typename Compare>
+void Heap<ValueType, Compare>::adjustDown(int k) {
+    while (2 * k <= elemNums) {
+        int j = 2 * k;
+        if (j < elemNums && comp(data[j], data[j + 1])) {
+            j++;
+        }
+        if (!comp(data[k], data[j])) {
+            break;
+        }
+        std::swap(data[k], data[j]);
+        k = j;
+    }
+}
+
+template <typename ValueType, typename Compare>
+void Heap<ValueType, Compare>::adjustUp(int k) {
+    while (k > 1 && comp(data[k], data[k / 2])) {
+        std::swap(data[k], data[k / 2]);
+        k /= 2;
+    }
+}
+
+template <typename ValueType, typename Compare>
+ValueType &Heap<ValueType, Compare>::top() {
+    if (elemNums >= 1) {
+        return data[1];
+    }
+    throw std::out_of_range("Heap Empty");
+}
+
+template <typename ValueType, typename Compare>
+void Heap<ValueType, Compare>::pop() noexcept {
+    if (elemNums > 0) {
+        std::swap(data[1], data[elemNums]);
+        --elemNums;
+        adjustDown(1);
+    }
+}
+
+template <typename ValueType, typename Compare>
+void Heap<ValueType, Compare>::push(ValueType val) {
+    ++elemNums;
+    data.resize(elemNums + 1);
+    data[elemNums] = std::move(val);
+    adjustUp(elemNums);
+}
+
+template <typename ValueType, typename Compare>
+void Heap<ValueType, Compare>::sort(vector<ValueType> &vc) {
+    vector<ValueType> ret;
+    auto heap = Heap<ValueType, Compare>(vc);
+    while (!heap.empty()) {
+        ret.push_back(heap.top());
+        heap.pop();
+    }
+    vc.assign(ret.begin(), ret.end());
+}
 
 #endif  // SHUAIKAI_LC_H
