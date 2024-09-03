@@ -1,21 +1,9 @@
-#include <bits/chrono.h>
-
-#include <algorithm>
-#include <chrono>
-#include <compare>
-#include <csignal>
-#include <iostream>
-#include <memory>
-#include <sstream>
-
-#include "skiplist.hpp"
 #include "lc.h"
 #include "utils.hpp"
 
 #define BIG_SCALE 5000
 
-#define BEGIN_TEST(msg) \
-    cout << "========== " << setw(10) << msg << " ==========\n";
+#define BEGIN_TEST(msg) cout << "========== " << setw(10) << msg << " ==========\n";
 
 #define RUN(X)          \
     do {                \
@@ -40,14 +28,12 @@ void utils_test() {
 }
 
 void list_test() {
-    auto list = buildList({1, 2, 3, 4, 5, 6, 7});
+    auto list = vector2List({1, 2, 3, 4, 5, 6, 7});
     ASSERT_STR_EQUAL("[1,2,3,4,5,6,7]", toString(list));
 }
 
 void tree_test() {
-    auto tree = new TreeNode(
-        1, new TreeNode(2),
-        new TreeNode(3, new TreeNode(4, new TreeNode(5), new TreeNode(6))));
+    auto tree = new TreeNode(1, new TreeNode(2), new TreeNode(3, new TreeNode(4, new TreeNode(5), new TreeNode(6))));
     ASSERT_STR_EQUAL("(Pre)[1,2,3,4,5,6],(In)[2,1,5,4,6,3]", toString(tree));
 }
 
@@ -60,8 +46,7 @@ void algorithm_test() {
 void string_utils_test() {
     auto str = " {This is his preciso s } "s;
     auto splited = splitString(str, "is");
-    ASSERT_STR_EQUAL(" {Th, , h, prec,o s } ",
-                     trimString(toString(splited), "[]"));
+    ASSERT_STR_EQUAL(" {Th, , h, prec,o s } ", trimString(toString(splited), "[]"));
     auto trimed = trimString(str);
     ASSERT_STR_EQUAL("{This is his preciso s }", trimed);
 }
@@ -122,10 +107,8 @@ void skiplist_benchmark() {
         skl->find(getRandomInt(0, length));
     }
     auto end = chrono::steady_clock::now();
-    auto duration =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    OUTV("[SKIPLIST-Len({})-Search {} Times]: Total {}, {}/per", length,
-         search_times, duration,
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    OUTV("[SKIPLIST-Len({})-Search {} Times]: Total {}, {}/per", length, search_times, duration,
          chrono::duration_cast<chrono::microseconds>(duration) / search_times);
 
     // LIST
@@ -141,10 +124,8 @@ void skiplist_benchmark() {
         }
     }
     end = chrono::steady_clock::now();
-    duration =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    OUTV("[LIST-Len({})-Search {} Times]: Total {}, {}/per", length,
-         search_times, duration,
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    OUTV("[LIST-Len({})-Search {} Times]: Total {}, {}/per", length, search_times, duration,
          chrono::duration_cast<chrono::microseconds>(duration) / search_times);
 
     // MAP
@@ -153,10 +134,8 @@ void skiplist_benchmark() {
         mp.find(getRandomInt(0, length));
     }
     end = chrono::steady_clock::now();
-    duration =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    OUTV("[MAP-Len({})-Search {} Times]: Total {}, {}/per", length,
-         search_times, duration,
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    OUTV("[MAP-Len({})-Search {} Times]: Total {}, {}/per", length, search_times, duration,
          chrono::duration_cast<chrono::microseconds>(duration) / search_times);
 
     // UNORDERED MAP
@@ -165,10 +144,8 @@ void skiplist_benchmark() {
         ump.find(getRandomInt(0, length));
     }
     end = chrono::steady_clock::now();
-    duration =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    OUTV("[UNORDERED_MAP-Len({})-Search {} Times]: Total {}, {}/per", length,
-         search_times, duration,
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    OUTV("[UNORDERED_MAP-Len({})-Search {} Times]: Total {}, {}/per", length, search_times, duration,
          chrono::duration_cast<chrono::microseconds>(duration) / search_times);
 }
 
@@ -180,16 +157,16 @@ void graph_test() {
     g2.addEdge(1, 2).addEdge(2, 3);
     print(g2);
     auto g3 = buildRandomGraph(50);
-    UF uf(g3);
+    UnionFindSet uf(g3);
     print(uf);
-	uf.normalize();
-	print(uf);
+    uf.normalize();
+    print(uf);
 }
 
 int main() {
     LOGV("START {} test", "lc");
 
-	RUN(lc_test);
+    RUN(lc_test);
     RUN(utils_test);
     RUN(list_test);
     RUN(tree_test);
@@ -197,7 +174,7 @@ int main() {
     RUN(string_utils_test);
     RUN(parse_op_test);
     RUN(skiplist_test);
-	RUN(skiplist_benchmark);
+    RUN(skiplist_benchmark);
     RUN(graph_test);
 
     ASSERT_ALL_PASSED();

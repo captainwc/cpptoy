@@ -496,7 +496,7 @@ inline ListNode *vector2List(vector<int> &&data) {
     return head;
 }
 
-inline ListNode *buildList(vector<int> &data) {
+inline ListNode *vector2List(vector<int> &data) {
     return vector2List(std::move(data));
 }
 
