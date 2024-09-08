@@ -1,6 +1,8 @@
 #ifndef SHUAIKAI_LC_H
 #define SHUAIKAI_LC_H
 
+#define LC_RUN_AND_DEBUG_MODE
+
 static_assert(__cplusplus >= 202002L, "Keep up with the times and embrace C++20, young people!");
 
 #ifdef __linux__
@@ -1506,6 +1508,7 @@ private:
     static int get_random_level();
 
     static int max_level;
+    static double factor;
     int node_num;
     SkipListNode<K, V> *head;
 };
@@ -1514,15 +1517,26 @@ template <typename K, typename V>
 int SkipList<K, V>::max_level = 20;
 
 template <typename K, typename V>
+double SkipList<K, V>::factor = 0.5;
+
+template <typename K, typename V>
 int SkipList<K, V>::get_random_level() {
-    auto engine = std::mt19937{std::random_device{}()};
-    auto distro = std::uniform_real_distribution<float>(0, 1);
     int level = 1;
-    while (distro(engine) < 0.5 && level <= max_level) {
-        ++level;
-    }
-    return level;
+    while ((random() & 0xFFFF) < (factor * 0xFFFF))
+        level += 1;
+    return (level < max_level) ? level : max_level;
 }
+
+// template <typename K, typename V>
+// int SkipList<K, V>::get_random_level() {
+//     auto engine = std::mt19937{std::random_device{}()};
+//     auto distro = std::uniform_real_distribution<float>(0, 1);
+//     int level = 1;
+//     while (distro(engine) < 0.5 && level <= max_level) {
+//         ++level;
+//     }
+//     return level;
+// }
 
 template <typename K, typename V>
 SkipListNode<K, V> *SkipList<K, V>::find(K key) const {
