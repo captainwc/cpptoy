@@ -11,3 +11,7 @@ python/*
 go/*
 test/*
 qiuzhao/*
+
+testlc
+perf*
+!perf-flamegraph.svg

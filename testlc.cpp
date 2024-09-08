@@ -174,7 +174,7 @@ int main() {
     // RUN(string_utils_test);
     // RUN(parse_op_test);
     // RUN(skiplist_test);
-	RUN(skiplist_benchmark);
+    RUN(skiplist_benchmark);
     // RUN(graph_test);
 
     ASSERT_ALL_PASSED();

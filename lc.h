@@ -344,8 +344,8 @@ concept PairLike = requires(T p) {
 };
 
 template <typename T>
-concept Printable = StreamOutable<T> || Serializable<T> || SequentialContainer<T> || MappedContainer<T> || PairLike<
-    T> || StackLike<T> || QueueLike<T>;
+concept Printable = StreamOutable<T> || Serializable<T> || SequentialContainer<T> || MappedContainer<T> || PairLike<T>
+                    || StackLike<T> || QueueLike<T>;
 
 template <bool>
 auto toString(bool obj);
@@ -354,27 +354,27 @@ template <Printable T>
 auto toString(const T &obj);
 
 template <typename T>
-requires Printable<typename T::value_type>
+    requires Printable<typename T::value_type>
 auto forBasedContainer2String(const T &c);
 
 template <SequentialContainer T>
-requires Printable<typename T::value_type>
+    requires Printable<typename T::value_type>
 auto SequentialContainer2String(const T &c);
 
 template <PairLike T>
-requires Printable<typename T::first_type> && Printable<typename T::second_type>
+    requires Printable<typename T::first_type> && Printable<typename T::second_type>
 auto Pair2String(const T &p);
 
 template <MappedContainer T>
-requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
+    requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
 auto MappedContainer2String(const T &c);
 
 template <StackLike T>
-requires Printable<typename T::value_type>
+    requires Printable<typename T::value_type>
 auto Stack2String(const T &c);
 
 template <QueueLike T>
-requires Printable<typename T::value_type>
+    requires Printable<typename T::value_type>
 auto Queue2String(const T &c);
 
 /// MARK: LEETCODE
@@ -522,7 +522,7 @@ inline void reverseList(ListNode **head) {
 /// MARK: printer Impl
 
 template <PairLike T>
-requires Printable<typename T::first_type> && Printable<typename T::second_type>
+    requires Printable<typename T::first_type> && Printable<typename T::second_type>
 
 auto Pair2String(const T &p) {
     std::stringstream ss;
@@ -531,7 +531,7 @@ auto Pair2String(const T &p) {
 }
 
 template <typename T>
-requires Printable<typename T::value_type>
+    requires Printable<typename T::value_type>
 
 auto forBasedContainer2String(const T &c) {
     if (c.empty()) {
@@ -556,21 +556,21 @@ auto forBasedContainer2String(const T &c) {
 }
 
 template <SequentialContainer T>
-requires Printable<typename T::value_type>
+    requires Printable<typename T::value_type>
 
 auto SequentialContainer2String(const T &c) {
     return forBasedContainer2String(c);
 }
 
 template <MappedContainer T>
-requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
+    requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
 
 auto MappedContainer2String(const T &c) {
     return forBasedContainer2String(c);
 }
 
 template <StackLike T>
-requires Printable<typename T::value_type>
+    requires Printable<typename T::value_type>
 
 auto Stack2String(const T &c) {
     if (c.empty()) {
@@ -594,7 +594,7 @@ auto Stack2String(const T &c) {
 }
 
 template <QueueLike T>
-requires Printable<typename T::value_type>
+    requires Printable<typename T::value_type>
 
 auto Queue2String(const T &c) {
     if (c.empty()) {
