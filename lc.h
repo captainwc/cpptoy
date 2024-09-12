@@ -148,7 +148,7 @@ SpinLock globalLogSpinLock;  // global cout lock
         std::cout << std::endl; \
     } while (0);
 
-#define SLEEP(n) std::this_thread::sleep_for(std::chrono::seconds(n))
+#define SLEEP(n) std::this_thread::sleep_for(std::chrono::milliseconds(n))
 
 /// MARK: test MCRO
 
@@ -1653,14 +1653,14 @@ public:
         q_.push(elem);
     }
 
-    void pop() {
+    std::optional<T> pop() {
         std::lock_guard<std::mutex> lock(mtx_);
+        if (q_.empty()) {
+            return std::nullopt;
+        }
+        auto ret = std::move(q_.front());
         q_.pop();
-    }
-
-    T &front() {
-        std::lock_guard<std::mutex> lock(mtx_);
-        return q_.front();
+        return std::optional<T>(std::move(ret));
     }
 };
 
@@ -1692,15 +1692,16 @@ private:
             if (workQueue_.empty()) {
                 cv_.wait(lock);
             }
-            auto task = std::move(workQueue_.front());
-            workQueue_.pop();
+            auto taskOpt = workQueue_.pop();
             lock.unlock();
-            std::invoke(task);
+            if (taskOpt.has_value()) {
+                std::invoke(taskOpt.value());
+            }
         }
     }
 
 public:
-    explicit ThreadPool(int corePoolSize = std::thread::hardware_concurrency())
+    explicit ThreadPool(unsigned int corePoolSize = std::thread::hardware_concurrency())
         : corePoolSize_(corePoolSize), isRunning_(true) {
         for (int i = 0; i < corePoolSize_; ++i) {
             workers_.emplace_back(&ThreadPool::doWork, this);
