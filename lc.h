@@ -148,7 +148,7 @@ SpinLock globalLogSpinLock;  // global cout lock
         std::cout << std::endl; \
     } while (0);
 
-#define SLEEP(n) std::this_thread::sleep_for(std::chrono::seconds(n))
+#define SLEEP(n) std::this_thread::sleep_for(std::chrono::milliseconds(n))
 
 /// MARK: test MCRO
 
@@ -349,8 +349,8 @@ concept PairLike = requires(T p) {
 };
 
 template <typename T>
-concept Printable = StreamOutable<T> || Serializable<T> || SequentialContainer<T> || MappedContainer<T> || PairLike<T>
-                    || StackLike<T> || QueueLike<T>;
+concept Printable = StreamOutable<T> || Serializable<T> || SequentialContainer<T> || MappedContainer<T> || PairLike<
+    T> || StackLike<T> || QueueLike<T>;
 
 template <bool>
 auto toString(bool obj);
@@ -359,27 +359,27 @@ template <Printable T>
 auto toString(const T &obj);
 
 template <typename T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 auto forBasedContainer2String(const T &c);
 
 template <SequentialContainer T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 auto SequentialContainer2String(const T &c);
 
 template <PairLike T>
-    requires Printable<typename T::first_type> && Printable<typename T::second_type>
+requires Printable<typename T::first_type> && Printable<typename T::second_type>
 auto Pair2String(const T &p);
 
 template <MappedContainer T>
-    requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
+requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
 auto MappedContainer2String(const T &c);
 
 template <StackLike T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 auto Stack2String(const T &c);
 
 template <QueueLike T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 auto Queue2String(const T &c);
 
 /// MARK: LEETCODE
@@ -527,7 +527,7 @@ inline void reverseList(ListNode **head) {
 /// MARK: printer Impl
 
 template <PairLike T>
-    requires Printable<typename T::first_type> && Printable<typename T::second_type>
+requires Printable<typename T::first_type> && Printable<typename T::second_type>
 
 auto Pair2String(const T &p) {
     std::stringstream ss;
@@ -536,7 +536,7 @@ auto Pair2String(const T &p) {
 }
 
 template <typename T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 
 auto forBasedContainer2String(const T &c) {
     if (c.empty()) {
@@ -561,21 +561,21 @@ auto forBasedContainer2String(const T &c) {
 }
 
 template <SequentialContainer T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 
 auto SequentialContainer2String(const T &c) {
     return forBasedContainer2String(c);
 }
 
 template <MappedContainer T>
-    requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
+requires Printable<typename T::key_type> && Printable<typename T::mapped_type>
 
 auto MappedContainer2String(const T &c) {
     return forBasedContainer2String(c);
 }
 
 template <StackLike T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 
 auto Stack2String(const T &c) {
     if (c.empty()) {
@@ -599,7 +599,7 @@ auto Stack2String(const T &c) {
 }
 
 template <QueueLike T>
-    requires Printable<typename T::value_type>
+requires Printable<typename T::value_type>
 
 auto Queue2String(const T &c) {
     if (c.empty()) {
@@ -1653,14 +1653,14 @@ public:
         q_.push(elem);
     }
 
-    void pop() {
+    std::optional<T> pop() {
         std::lock_guard<std::mutex> lock(mtx_);
+        if (q_.empty()) {
+            return std::nullopt;
+        }
+        auto ret = std::move(q_.front());
         q_.pop();
-    }
-
-    T &front() {
-        std::lock_guard<std::mutex> lock(mtx_);
-        return q_.front();
+        return std::optional<T>(std::move(ret));
     }
 };
 
@@ -1692,10 +1692,11 @@ private:
             if (workQueue_.empty()) {
                 cv_.wait(lock);
             }
-            auto task = std::move(workQueue_.front());
-            workQueue_.pop();
+            auto taskOpt = workQueue_.pop();
             lock.unlock();
-            std::invoke(task);
+            if (taskOpt.has_value()) {
+                std::invoke(taskOpt.value());
+            }
         }
     }
 

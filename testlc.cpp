@@ -167,10 +167,10 @@ void graph_test() {
 
 void threadPool_test() {
     auto mul = [](int c, int d) {
-        SLEEP(3);
+        SLEEP(100);
         return c * d;
     };
-    int num = 2;
+    int num = 100;
     ThreadPool pool;
     vector<std::future<int>> futures(num);
     for (int i = 0; i < num; i++) {
