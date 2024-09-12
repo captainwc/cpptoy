@@ -76,7 +76,7 @@ AllowShortFunctionsOnASingleLine: None
 # 允许短的if语句保持在同一行
 AllowShortIfStatementsOnASingleLine: Never
 # 允许短的Lambdas语句保持在同一行
-AllowShortLambdasOnASingleLine: None
+AllowShortLambdasOnASingleLine: All
 # 允许短的循环保持在同一行
 AllowShortLoopsOnASingleLine: false
 # 总是在定义返回类型后换行(deprecated)
@@ -111,7 +111,7 @@ BreakAfterJavaFieldAnnotations: false
 # 允许中断长字符串
 BreakStringLiterals: true
 # 描述具有特殊意义的注释的正则表达式，它不应该被分割为多行或以其它方式改变
-CommentPragmas: '^ IWYU pragma:'
+CommentPragmas: "^ IWYU pragma:"
 # 允许连续的名称空间声明将在同一行
 CompactNamespaces: false
 # 构造函数的初始化列表的缩进宽度
@@ -152,16 +152,16 @@ IncludeCategories:
     Priority: 1
     SortPriority: 0
     CaseSensitive: false
-  - Regex: '^<.*'
+  - Regex: "^<.*"
     Priority: 2
     SortPriority: 0
     CaseSensitive: false
-  - Regex: '.*'
+  - Regex: ".*"
     Priority: 3
     SortPriority: 0
     CaseSensitive: false
 # include块排序
-IncludeIsMainRegex: '([-_](test|unittest))?$'
+IncludeIsMainRegex: "([-_](test|unittest))?$"
 # 缩进修饰符
 IndentAccessModifiers: false
 # 缩进case块
@@ -185,9 +185,9 @@ KeepEmptyLinesAtTheStartOfBlocks: true
 # Lambda块缩进
 LambdaBodyIndentation: Signature
 # 开始一个块的宏的正则表达式
-MacroBlockBegin: ''
+MacroBlockBegin: ""
 # 结束一个块的宏的正则表达式
-MacroBlockEnd: ''
+MacroBlockEnd: ""
 # 连续空行的最大数量
 MaxEmptyLinesToKeep: 1
 # 命名空间的缩进: None, Inner(缩进嵌套的命名空间中的内容), All
@@ -221,9 +221,9 @@ RawStringFormats:
       - cpp
       - Cpp
       - CPP
-      - 'c++'
-      - 'C++'
-    CanonicalDelimiter: ''
+      - "c++"
+      - "C++"
+    CanonicalDelimiter: ""
     BasedOnStyle: google
   - Language: TextProto
     Delimiters:

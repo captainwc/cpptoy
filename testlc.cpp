@@ -1,3 +1,7 @@
+#include <chrono>
+#include <cstdio>
+#include <thread>
+
 #include "lc.h"
 #include "utils.hpp"
 
@@ -54,9 +58,7 @@ void string_utils_test() {
 void parse_op_test() {
     auto ops = R"(["create","add","sub","mul","add","destory"])";
     auto datas = R"([[],[1],[2],[],[4],[]])";
-    auto func = [](string cmd, string data) {
-        OUTV("OP: {}, data: {}", cmd, (data == "" ? "null" : data));
-    };
+    auto func = [](string cmd, string data) { OUTV("OP: {}, data: {}", cmd, (data == "" ? "null" : data)); };
     parseOperations(ops, datas, func);
 }
 
@@ -163,6 +165,23 @@ void graph_test() {
     print(uf);
 }
 
+void threadPool_test() {
+    auto mul = [](int c, int d) {
+        SLEEP(3);
+        return c * d;
+    };
+    int num = 2;
+    ThreadPool pool;
+    vector<std::future<int>> futures(num);
+    for (int i = 0; i < num; i++) {
+        futures[i] = pool.submit(mul, i, i);
+    }
+    for (int i = 0; i < num; i++) {
+        printf("future_%d: %d, ", i, futures[i].get());
+    }
+    putchar('\n');
+}
+
 int main() {
     LOGV("START {} test", "lc");
 
@@ -174,8 +193,9 @@ int main() {
     // RUN(string_utils_test);
     // RUN(parse_op_test);
     // RUN(skiplist_test);
-    RUN(skiplist_benchmark);
+    // RUN(skiplist_benchmark);
     // RUN(graph_test);
+    RUN(threadPool_test);
 
     ASSERT_ALL_PASSED();
 

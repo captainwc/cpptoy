@@ -1,6 +1,9 @@
 #ifndef SHUAIKAI_LC_H
 #define SHUAIKAI_LC_H
 
+#include <condition_variable>
+#include <mutex>
+#include <optional>
 #define LC_RUN_AND_DEBUG_MODE
 
 static_assert(__cplusplus >= 202002L, "Keep up with the times and embrace C++20, young people!");
@@ -144,6 +147,8 @@ SpinLock globalLogSpinLock;  // global cout lock
         GUARD_LOG;              \
         std::cout << std::endl; \
     } while (0);
+
+#define SLEEP(n) std::this_thread::sleep_for(std::chrono::seconds(n))
 
 /// MARK: test MCRO
 
@@ -770,13 +775,10 @@ inline vector<string> splitString(string_view input, string_view delim) {
 
 inline string trimString(string str, string_view trimed = R"( []")") {
     set<char> trimedChar(trimed.begin(), trimed.end());
-    str.erase(str.begin(), std::find_if(str.begin(), str.end(), [&trimedChar](char ch) {
-                  return trimedChar.find(ch) == trimedChar.end();
-              }));
+    str.erase(str.begin(), std::find_if(str.begin(), str.end(),
+                                        [&trimedChar](char ch) { return trimedChar.find(ch) == trimedChar.end(); }));
     str.erase(std::find_if(str.rbegin(), str.rend(),
-                           [&trimedChar](char ch) {
-                               return trimedChar.find(ch) == trimedChar.end();
-                           })
+                           [&trimedChar](char ch) { return trimedChar.find(ch) == trimedChar.end(); })
                   .base(),
               str.end());
     return str;
@@ -872,9 +874,7 @@ inline double getRandomDouble(double start = 0, double end = 1) {
 inline vector<int> getIntVector(string str) {
     auto tmp = splitString(trimString(str), ",");
     vector<int> ret;
-    std::transform(tmp.begin(), tmp.end(), std::back_inserter(ret), [](const string &x) {
-        return std::stoi(x);
-    });
+    std::transform(tmp.begin(), tmp.end(), std::back_inserter(ret), [](const string &x) { return std::stoi(x); });
     return ret;
 }
 
@@ -1628,5 +1628,103 @@ void SkipList<K, V>::dump() const {
         cout << "(NULL)\n\n";
     }
 }
+
+/// MARK: ThreadPool
+
+template <typename T>
+class WorkQueue {
+private:
+    std::queue<T> q_;
+    mutable std::mutex mtx_;
+
+public:
+    [[nodiscard]] bool empty() const {
+        std::lock_guard<std::mutex> lock(mtx_);
+        return q_.empty();
+    }
+
+    void push(T &&elem) {
+        std::lock_guard<std::mutex> lock(mtx_);
+        q_.push(std::move(elem));
+    }
+
+    void push(T &elem) {
+        std::lock_guard<std::mutex> lock(mtx_);
+        q_.push(elem);
+    }
+
+    void pop() {
+        std::lock_guard<std::mutex> lock(mtx_);
+        q_.pop();
+    }
+
+    T &front() {
+        std::lock_guard<std::mutex> lock(mtx_);
+        return q_.front();
+    }
+};
+
+class ThreadPool {
+private:
+    using TaskType = std::function<void()>;
+
+    std::mutex mtx_;
+    std::condition_variable cv_;
+
+    unsigned int corePoolSize_;
+    std::atomic<bool> isRunning_;
+    WorkQueue<TaskType> workQueue_;
+    std::vector<std::thread> workers_;
+
+    void shutdown() {
+        isRunning_.store(false);
+        cv_.notify_all();
+        for (auto &worker : workers_) {
+            if (worker.joinable()) {
+                worker.join();
+            }
+        }
+    }
+
+    void doWork() {
+        while (isRunning_) {
+            std::unique_lock<std::mutex> lock(mtx_);
+            if (workQueue_.empty()) {
+                cv_.wait(lock);
+            }
+            auto task = std::move(workQueue_.front());
+            workQueue_.pop();
+            lock.unlock();
+            std::invoke(task);
+        }
+    }
+
+public:
+    explicit ThreadPool(int corePoolSize = std::thread::hardware_concurrency())
+        : corePoolSize_(corePoolSize), isRunning_(true) {
+        for (int i = 0; i < corePoolSize_; ++i) {
+            workers_.emplace_back(&ThreadPool::doWork, this);
+        }
+    }
+
+    ThreadPool(const ThreadPool &) = delete;
+    ThreadPool(ThreadPool &&) = delete;
+    ThreadPool &operator=(const ThreadPool &) = delete;
+    ThreadPool &operator=(ThreadPool &&) = delete;
+
+    ~ThreadPool() {
+        shutdown();
+    }
+
+    template <typename F, typename... Args>
+    auto submit(F &&f, Args &&...args) -> std::future<decltype(f(args...))> {
+        auto func = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
+        auto task_ptr = std::make_shared<std::packaged_task<decltype(f(args...))()>>(func);
+        auto task = [task_ptr]() { (*task_ptr)(); };
+        workQueue_.push(task);
+        cv_.notify_one();
+        return task_ptr->get_future();
+    }
+};
 
 #endif  // SHUAIKAI_LC_H
