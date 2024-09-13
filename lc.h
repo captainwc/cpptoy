@@ -1701,7 +1701,7 @@ private:
     }
 
 public:
-    explicit ThreadPool(int corePoolSize = std::thread::hardware_concurrency())
+    explicit ThreadPool(unsigned int corePoolSize = std::thread::hardware_concurrency())
         : corePoolSize_(corePoolSize), isRunning_(true) {
         for (int i = 0; i < corePoolSize_; ++i) {
             workers_.emplace_back(&ThreadPool::doWork, this);
